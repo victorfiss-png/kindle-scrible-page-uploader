@@ -127,9 +127,10 @@ export async function processNotebookPages(
     }
     notice.hide();
 
-    // 3. Save the final Markdown file
+    // 3. Save the final Markdown file with PDF embed at the top
+    const pdfEmbed = `![[${fileName}.pdf]]\n\n---\n\n`;
     const mdFilePath = normalizePath(`${dirPath}/${fileName}.md`);
-    await saveTextToVault(app, mdFilePath, fullMarkdown.trim());
+    await saveTextToVault(app, mdFilePath, pdfEmbed + fullMarkdown.trim());
     new Notice(`Finished! Notes saved to ${mdFilePath}`);
 }
 

@@ -30,7 +30,8 @@ async function fetchPages(
     fileId: string,
     noteName: string,
     update: (p: number) => void,
-    selectedPages?: Set<number>
+    selectedPages?: Set<number>,
+    pdfFolder = 'scribe notes'
 ): Promise<string[]> {
     update(0);
 
@@ -87,7 +88,7 @@ async function fetchPages(
             return pageIdx !== undefined && selectedPages!.has(pageIdx);
         });
 
-    await convertTarToPdf(app, pagesData, noteName);
+    await convertTarToPdf(app, pagesData, noteName, pdfFolder);
     update(50);
 
     return images.map(image => arrayBufferToBase64(image.data.buffer as ArrayBuffer));
@@ -104,12 +105,13 @@ export const useNotebook = (fileId: string, noteName: string): UseNotebook => {
 
     const downloadAndProcessTask = useCallback(async (update: (p: number) => void, selectedPages?: Set<number>) => {
         const { openRouterKey, model } = settings;
+        const folder = 'scribe notes/' + noteName;
 
-        const images = await fetchPages(app, fileId, noteName, update, selectedPages);
+        const images = await fetchPages(app, fileId, noteName, update, selectedPages, folder);
         await processNotebookPages(
             app,
             images,
-            'scribe notes ai/' + noteName,
+            folder,
             noteName,
             openRouterKey,
             model

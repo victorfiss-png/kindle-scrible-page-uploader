@@ -98,7 +98,7 @@ export const exportImagesFromTar = async (allTarBuffers: ArrayBuffer[]) => {
     return allImages;
 }
 
-export const convertTarToPdf = async (app: App, allTarBuffers: ArrayBuffer[], noteName: string) => {
+export const convertTarToPdf = async (app: App, allTarBuffers: ArrayBuffer[], noteName: string, folderPath = 'scribe notes') => {
     try {
         const pdf = new jsPDF({
             orientation: "p",
@@ -131,7 +131,7 @@ export const convertTarToPdf = async (app: App, allTarBuffers: ArrayBuffer[], no
         }
 
         // 4. Save the final result
-        void savePdfToVault(app, pdf, 'scribe notes', noteName);
+        void savePdfToVault(app, pdf, folderPath, noteName);
 
     } catch (error) {
         console.error("Master PDF conversion failed:", error);
