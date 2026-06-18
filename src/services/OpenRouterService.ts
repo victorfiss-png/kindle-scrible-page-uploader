@@ -15,20 +15,17 @@ async function analyzeNotebookPage(
     const openRouter = new OpenRouter({
         apiKey
     });
-    const prompt = `
-    Analyze this notebook page.
-    1. Transcribe all handwritten text into clean Markdown.
-    2. Identify any distinct sketches, diagrams, or charts.
-    3. Return a JSON object with:
-       - "text": The markdown text. Do NOT describe the images in the text, just place a placeholder like {{IMG_1}} where the sketch fits.
-       - "crops": A list of bounding boxes for sketches: [ymin, xmin, ymax, xmax] (scale 0-1000).
-    
-    Example Output:
-    {
-      "text": "# Header\\n\\nSome notes here.\\n\\n{{IMG_1}}\\n\\nMore text.",
-      "crops": [{"id": "IMG_1", "box_2d": [150, 100, 500, 900]}]
-    }
-    `;
+    const prompt = `Analyze this notebook page.
+1. Transcribe all handwritten text into clean Markdown.
+2. Identify any distinct sketches, diagrams, or charts.
+3. Return ONLY a raw JSON object (no markdown fences, no extra text) with:
+   - "text": The markdown text. Do NOT describe the images in the text, just place a placeholder like {{IMG_1}} where the sketch fits.
+   - "crops": A list of bounding boxes for sketches: [ymin, xmin, ymax, xmax] (scale 0-1000).
+
+Example Output:
+{"text": "# Header\\n\\nSome notes here.\\n\\n{{IMG_1}}\\n\\nMore text.", "crops": [{"id": "IMG_1", "box_2d": [150, 100, 500, 900]}]}
+
+If there are no sketches, return an empty crops array. Return ONLY the JSON object.`;
 
     for (let attempt = 0; attempt < maxRetries; attempt++) {
         try {
@@ -48,14 +45,16 @@ async function analyzeNotebookPage(
                         }
                     ],
                     temperature: 0.3,
-                    responseFormat: { type: "json_object" }
                 }
             });
 
             if (response.choices[0] !== undefined) {
-                const content = response.choices[0].message.content as string;
-                //todo: add validation
-                return JSON.parse(content) as NotebookAnalysis;
+                const raw = response.choices[0].message.content as string;
+                const jsonStr = raw.replace(/^```(?:json)?\s*\n?/i, '').replace(/\n?```\s*$/, '').trim();
+                const parsed = JSON.parse(jsonStr) as NotebookAnalysis;
+                if (!parsed.crops) parsed.crops = [];
+                if (!parsed.text) parsed.text = "";
+                return parsed;
             }
 
         } catch (error) {
