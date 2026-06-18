@@ -121,8 +121,10 @@ export async function processNotebookPages(
             fullMarkdown += pageText.trim() + '\n'
 
         } catch (e) {
-            new Notice(`Failed to process page ${i + 1}`);
-            console.error(e);
+            const msg = e instanceof Error ? e.message : String(e);
+            new Notice(`Failed to process page ${i + 1}: ${msg}`, 10000);
+            console.error(`Page ${i + 1} analysis failed:`, e);
+            fullMarkdown += `\n\n> [!error] Page ${i + 1} transcription failed\n> ${msg}\n\n`;
         }
     }
     notice.hide();

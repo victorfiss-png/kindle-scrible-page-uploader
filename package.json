@@ -1,6 +1,6 @@
 {
 	"name": "kindle-scribe-page-uploader",
-	"version": "0.4.3",
+	"version": "0.4.4",
 	"description": "Download selected pages from Kindle Scribe notebooks into Obsidian, with optional AI processing via OpenRouter.",
 	"type": "module",
 	"scripts": {

@@ -108,7 +108,12 @@ Example Output:
 {"text": "# Header\\n\\nSome notes here.\\n\\n{{IMG_1}}\\n\\nMore text.", "crops": [{"id": "IMG_1", "box_2d": [150, 100, 500, 900]}]}
 
 If there are no sketches, return an empty crops array. Return ONLY the JSON object.`;async function vie(e,t,a,r=3){var A,n;for(let i=0;i<r;i++)try{let s=(await(0,lP.requestUrl)({url:"https://openrouter.ai/api/v1/chat/completions",method:"POST",headers:{Authorization:`Bearer ${t}`,"Content-Type":"application/json"},body:JSON.stringify({model:a,temperature:.3,messages:[{role:"user",content:[{type:"text",text:mie},{type:"image_url",image_url:{url:`data:image/png;base64,${e}`}}]}]})})).json;if(s.error)throw new Error((A=s.error.message)!=null?A:JSON.stringify(s.error));let l=(n=s.choices)==null?void 0:n[0];if(l){let v=l.message.content.replace(/^```(?:json)?\s*\n?/i,"").replace(/\n?```\s*$/,"").trim(),w=JSON.parse(v);return w.crops||(w.crops=[]),w.text||(w.text=""),w}}catch(o){if(console.error(`Analysis attempt ${i+1} failed:`,o),i===r-1)throw o;await new Promise(s=>setTimeout(s,5e3))}throw new Error("Max retries reached")}async function uP(e,t,a,r,A,n){let i=(0,Jo.normalizePath)(a),o=(0,Jo.normalizePath)(`${i}/attachments`),s="";await e.vault.adapter.exists(i)||await e.vault.createFolder(i),await e.vault.adapter.exists(o)||await e.vault.createFolder(o);let l=new Jo.Notice("Analizing pages",0);for(let w=0;w<t.length;w++){let d=t[w];if(d)try{let x=await vie(d,A,n),L=x.text;l.setMessage(`Analyzing ${w+1} out of ${t.length}`);for(let Q of x.crops){let y=`${r}_pg${w+1}_${Q.id}.png`,S=`${o}/${y}`,U=await wie(d,Q.box_2d);await Bie(e,S,await U.arrayBuffer());let E=`{{${Q.id}}}`,K=`![[${y}]]`;L=L.replace(E,K)}s+=L.trim()+`
-`}catch(x){new Jo.Notice(`Failed to process page ${w+1}`),console.error(x)}}l.hide();let f=`![[${r}.pdf]]
+`}catch(x){let L=x instanceof Error?x.message:String(x);new Jo.Notice(`Failed to process page ${w+1}: ${L}`,1e4),console.error(`Page ${w+1} analysis failed:`,x),s+=`
+
+> [!error] Page ${w+1} transcription failed
+> ${L}
+
+`}}l.hide();let f=`![[${r}.pdf]]
 
 ---
 
