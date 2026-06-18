@@ -1,0 +1,10 @@
+{
+	"id": "kindle-scribe-page-uploader",
+	"name": "Kindle Scribe Page Uploader",
+	"version": "0.4.0",
+	"minAppVersion": "0.15.0",
+	"description": "Download selected pages from Kindle Scribe notebooks into Obsidian, with optional AI processing via OpenRouter.",
+	"author": "victorfiss",
+	"authorUrl": "https://github.com/victorfiss-png",
+	"isDesktopOnly": true
+}

@@ -1,0 +1,124 @@
+ /* loading keyframe */
+ @keyframes loading {
+     0% {
+         transform: rotate(0);
+     }
+
+     100% {
+         transform: rotate(360deg);
+     }
+ }
+
+ /* apply the loading keyframe to element */
+ .rotate {
+     animation: loading 3s linear infinite;
+ }
+
+ .notes-content {
+    max-height: 500px;
+    min-height: 200px;
+    overflow-y: scroll;
+    border-radius: var(--modal-radius);
+    border: var(--modal-border-color) var(--modal-border-width) solid;
+ }
+
+ .file-modal {
+    max-height: 600px;
+    transition: height 0.15s ease-out;
+ }
+ .non-notes-content {
+     height: 340px;
+     display: flex;
+     align-items: center;
+     justify-content: center;
+ }
+
+ .error-text {
+    display: grid;
+    align-items: center;
+    justify-items: center;
+ }
+
+ .file-row {
+    display: grid;
+    margin-left: 30px;
+    margin-right: 30px;
+    grid-template-columns: 1fr auto;
+    margin-top: 15px;
+    align-items: center;
+ }
+
+ .note-container {
+    margin-bottom: 4px;
+ }
+
+ .note-title {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    user-select: none;
+ }
+
+ .page-count {
+    opacity: 0.6;
+    font-size: 0.85em;
+    margin-left: 4px;
+ }
+
+ .page-selector {
+    margin: 6px 30px 0;
+    padding: 8px;
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 6px;
+    background: var(--background-secondary);
+ }
+
+ .page-selector-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.85em;
+    margin-bottom: 6px;
+    opacity: 0.8;
+ }
+
+ .page-selector-btn {
+    font-size: 0.8em;
+    padding: 2px 8px;
+    cursor: pointer;
+ }
+
+ .page-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+ }
+
+ .page-chip {
+    min-width: 32px;
+    height: 28px;
+    padding: 0 6px;
+    font-size: 0.8em;
+    border-radius: 4px;
+    border: 1px solid var(--background-modifier-border);
+    background: var(--background-primary);
+    cursor: pointer;
+    color: var(--text-normal);
+ }
+
+ .page-chip-selected {
+    background: var(--interactive-accent);
+    color: var(--text-on-accent);
+    border-color: var(--interactive-accent);
+ }
+
+ .sel-badge {
+    font-size: 0.7em;
+    background: var(--interactive-accent);
+    color: var(--text-on-accent);
+    border-radius: 8px;
+    padding: 1px 5px;
+    margin-left: 2px;
+    vertical-align: super;
+ }
