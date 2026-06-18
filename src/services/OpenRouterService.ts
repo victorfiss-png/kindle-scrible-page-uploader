@@ -1,4 +1,4 @@
-import { OpenRouter } from '@openrouter/sdk';
+import { requestUrl } from 'obsidian';
 import { Notice, normalizePath, TFile, App } from 'obsidian';
 
 interface NotebookAnalysis {
@@ -6,16 +6,7 @@ interface NotebookAnalysis {
     crops: Array<{ id: string; box_2d: [number, number, number, number] }>;
 }
 
-async function analyzeNotebookPage(
-    imgBase64: string,
-    apiKey: string,
-    modelId: string,
-    maxRetries: number = 3
-): Promise<NotebookAnalysis> {
-    const openRouter = new OpenRouter({
-        apiKey
-    });
-    const prompt = `Analyze this notebook page.
+const ANALYSIS_PROMPT = `Analyze this notebook page.
 1. Transcribe all handwritten text into clean Markdown.
 2. Identify any distinct sketches, diagrams, or charts.
 3. Return ONLY a raw JSON object (no markdown fences, no extra text) with:
@@ -27,29 +18,48 @@ Example Output:
 
 If there are no sketches, return an empty crops array. Return ONLY the JSON object.`;
 
+async function analyzeNotebookPage(
+    imgBase64: string,
+    apiKey: string,
+    modelId: string,
+    maxRetries: number = 3
+): Promise<NotebookAnalysis> {
     for (let attempt = 0; attempt < maxRetries; attempt++) {
         try {
-            const response = await openRouter.chat.send({
-                chatGenerationParams: {
+            const response = await requestUrl({
+                url: "https://openrouter.ai/api/v1/chat/completions",
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${apiKey}`,
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
                     model: modelId,
+                    temperature: 0.3,
                     messages: [
                         {
                             role: "user",
                             content: [
-                                { type: "text", text: prompt },
+                                { type: "text", text: ANALYSIS_PROMPT },
                                 {
                                     type: "image_url",
-                                    imageUrl: { url: `data:image/png;base64,${imgBase64}` }
+                                    image_url: { url: `data:image/png;base64,${imgBase64}` }
                                 }
                             ]
                         }
                     ],
-                    temperature: 0.3,
-                }
+                }),
             });
 
-            if (response.choices[0] !== undefined) {
-                const raw = response.choices[0].message.content as string;
+            const data = response.json;
+
+            if (data.error) {
+                throw new Error(data.error.message ?? JSON.stringify(data.error));
+            }
+
+            const choice = data.choices?.[0];
+            if (choice) {
+                const raw: string = choice.message.content;
                 const jsonStr = raw.replace(/^```(?:json)?\s*\n?/i, '').replace(/\n?```\s*$/, '').trim();
                 const parsed = JSON.parse(jsonStr) as NotebookAnalysis;
                 if (!parsed.crops) parsed.crops = [];
@@ -58,9 +68,8 @@ If there are no sketches, return an empty crops array. Return ONLY the JSON obje
             }
 
         } catch (error) {
-            console.error("Analysis failed:", error);
+            console.error(`Analysis attempt ${attempt + 1} failed:`, error);
             if (attempt === maxRetries - 1) throw error;
-            // Short backoff for network timeouts
             await new Promise(resolve => setTimeout(resolve, 5000));
         }
     }
